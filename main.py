@@ -1,66 +1,86 @@
-## git:blueish/all-chat-bot
-
 ## IMPORTS
 import praw
 import time
-# import reddit       # for the reddit portion
-import subprocess   # for calling all of the different modules
-import process      # for processing the json fles
 import steam        # for getting replay files from steam
 import re
 
-def check_comment(comment):
-	# check the comment based on re
-	return re.match("(http[s]?://)?(www.)?dotabuff.com/players/\d{0,10}",
-	                comment.body) ? 
-	                re.findall("\d{0,10}", comment.body) : False
+## GLOBALS
 
+COLOR_DICT = {0 : "blue",
+              1 : "teal",
+              2 : "purple",
+              3 : "yellow",
+              4 : "orange",
+              128:"pink",
+              129:"puse",
+              130:"light blue",
+              131:"green",
+              132:"brown"}
+
+## FUNCTIONS
+
+def check_comment(comment):
+	# check the comment based on regex, give back the ID
+    if re.match("(http[s]?://)?(www.)?dotabuff.com/players/\d{0,10}",
+                    comment.body):
+        return re.findall("\d{0,10}", comment.body)
+    else:
+        return False
+
+
+def oauth():
+    # ugh I liked the login prompt better
+    f = open("botpass.txt")
+    bot_pass = f.readline()
+    f.close()
+    user_agent = "Windows:DotaColor:v1.0 by /u/blueish101"
+    r = praw.Reddit(user_agent=user_agent)
+    r.set_oauth_app_info(client_id='H7CZAzGmv6h-cQ',
+                         client_secre=bot_pass,
+                         redirect_uri=http://127.0.0.1:65010/'
+                                  'authorize_callback')
+
+# returns the Reddit object
+def connect():
+    f = open("botpass.txt")
+    bot_pass = f.readline()
+    f.close()
+    user_agent = "Windows:DotaColor:v1.0 by /u/blueish101"
+    r = praw.Reddit(user_agent=user_agent)
+    r.set_oauth_app_info(client_id='H7CZAzGmv6h-cQ',
+                         client_secre=bot_pass,
+                         redirect_uri=http://127.0.0.1:65010/'
+                                  'authorize_callback')
+    print("Connecting to Reddit with user_agent")
+    return r
+
+# posts a reply to reddit
+def reddit_reply(comment, color):
+    comment.reply("This person is most commonly {}.")
 
 
 ## Main method: put it all together:
 def main():
     # first call connect
-    r = connect_to_reddit()
+    r = connect()
 
-    for comment in praw.helpers.comment_stream(r, "allchatbot"):
-    	num = check_comment(comment)
-    	if num:
+    for comment in praw.helpers.comment_stream(r, "test"):
+        print("Checking a comment")
+        # check the comment if it matches, if it does, we have the profile #
+        num = check_comment(comment)
+        if num:
+            # now we call steam and get the latest 100 game infos
+            result = steam.main(num)
+            color = COLOR_DICT[result]
 
-            # find a way to save all of the match IDs we've processed, and
-            # filter them so we don't do them again.
+            # we have the most used color, reply back to reddit with the info
+            reddit_reply(comment, color)
 
-            # We now have match IDs as strings, we need the matches
-            # connect to Steam API to retrieve them
-            # for item in arr:
-            #     success = steam.main(item)
-            #     success ?
-            #         print("Sucessful download of {} from steam".format(item)) :
-            #         print("Error downloading of {} from steam".format(item))
-
-
-            # We have the replay files, now we call them with clarity
-            # for item in arr:
-            #     clarity_output = subprocess.check_output([item  + ".TODO~!!"])
-            #         print("Error processing item{}\n".format(item))
-
-            # Clarity has processed each match, and placed it in a file "matchID.json"
-            # now we call the process.py for translation back into python classes
-            all_chat = []
-            for item in arr:
-                chat_message = process.main(item)
-                chat_message ?
-                    print("Sucessful processing of {} from steam".format(item)) :
-                    print("Error processing of {} from steam".format(item))
-                all_chat.append(chat_message)
-
-            # we have each match processed and all of the messages are now in an array
-            # let's process results
-            result = process.process_chat(all_chat)
-            
+            print("Replied to a comment")
         # no else condition, skip the comment, and continue
         
     
 
 
-# if __name__ == "main.py":
-    # main()
+if __name__ == "__main__":
+    main()
