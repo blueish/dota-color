@@ -20,8 +20,11 @@ def parse_data(data, ID):
 	else:
 		for match in data['result']['matches']:
 			for player in match["players"]:
-				if player["account_id"] == ID:
-					count[player["player_slot"]] += 1
+				try:
+				    if player["account_id"] == ID:
+				        count[player["player_slot"]] += 1
+				except:
+					pass
 		# easy trick from stackoverflow.com/questions/268272
 		# gets the key for the largest value
 		inverse = [(value, key) for key, value in count.items()]
@@ -31,6 +34,7 @@ def main(ID):
     # call steam
     f = open("key.txt")
     key = f.readline()
+    f.close()
 
     # now we parse through the data
     data = call_steam(key, ID)
