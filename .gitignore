@@ -42,3 +42,4 @@ key.txt
 *.*~
 *.class
 praw.ini
+*pycache*
