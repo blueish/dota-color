@@ -6,6 +6,7 @@ import re
 
 ## GLOBALS
 
+# steam returns positions as 0-4, 128-132, keep track in a dict for conversion
 COLOR_DICT = {0 : "blue",
               1 : "teal",
               2 : "purple",
@@ -40,9 +41,8 @@ def oauth():
                                   'authorize_callback')
     access_info = r.get_access_information('hGauT37otwsdciy38Y3yUVNpNXY')
 
-# returns the Reddit object
+# connects, logs in, returns the Reddit object
 def connect():
-
     user_agent = "Windows:DotaColor:v1.0 by /u/blueish101"
     r = praw.Reddit(user_agent=user_agent)
     r.login()
@@ -59,11 +59,10 @@ def reddit_reply(comment, color):
 
 ## Main method: put it all together:
 def main():
-    # first call connect
+    # call connect, get reddit object
     r = connect()
 
     for comment in praw.helpers.comment_stream(r, "test"):
-        #print("Checking a comment")
         # check the comment if it matches, if it does, we have the profile #
         num = check_comment(comment)
         if num:
